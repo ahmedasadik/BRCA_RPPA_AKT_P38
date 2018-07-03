@@ -45,8 +45,11 @@ tor_targets <- c("AKT_pT308","P38_pT180Y182","P38MAPK","AKT_pS473","P70S6K_pT389
 ALL_df <- data.frame(pt_sample_ID=new_BRCA_ColData$sample, stringsAsFactors = F)
 ALL_df[,tor_targets] <- matrix(nrow = dim(ALL_df)[1], ncol = length(tor_targets))
 ALL_df[,tor_targets] <- breast_rpp[match(ALL_df$pt_sample_ID, breast_rpp$new_sample_ID),c(tor_targets)]
+
+## Remove all patients that don't have both expression and protein data
 rppa_df <- ALL_df[!is.na(ALL_df$AKT_pT308),]
 
+## Create the dataframe comprising both RPPA values and metadata
 metadata_rppa <- new_BRCA_ColData[match(rppa_df$pt_sample_ID, new_BRCA_ColData$sample),]
 
 rppa_df <- data.frame(rppa_df, sex=metadata_rppa$gender,
@@ -72,14 +75,13 @@ rppa_df$days_to_death2 <- ifelse(!is.na(rppa_df$days_to_death), rppa_df$days_to_
                                  ifelse(is.na(rppa_df$days_to_death) & !is.na(rppa_df$days_to_last), rppa_df$days_to_last,
                                         ifelse(is.na(rppa_df$days_to_last), rppa_df$surv_days, NA)))
 
-## Combined rppa dataset with targets and groups
-groups_AKT_T308 <- map2(list(rppa_df$AKT_pT308),c(0,0.5,1,1.5), group_no_z_FUN) %>% do.call(cbind,.)
-colnames(groups_AKT_T308) <- paste("AKT_T308_", c(0,05,1,15), sep = "")
+## Combined rppa dataset with targets only and groups. The second argument in map2 can be changed to any numeric vector of length 1L or more.
+groups_AKT_T308 <- map2(list(rppa_df$AKT_pT308),list(c(0)), group_no_z_FUN) %>% do.call(cbind,.)
+colnames(groups_AKT_T308) <- paste("AKT_T308_", c(0), sep = "")
 rppa_all <- data.frame(rppa_df, groups_AKT_T308, stringsAsFactors = F)
 write.table(rppa_all,"./rppa_all.txt", sep = "\t")
 
-
-## P38 group assignments in the AKT groups
+## P38 group assignments in the AKT groups. The value of y for the group_no_z_FUN is zero. The user can decide to change this value to match the value used in line 79 or not.
 rppa_all$AKT_pT308_hi_lo_p38_grps <- rppa_all$AKT_T308_0
 
 rppa_all$AKT_pT308_hi_lo_p38_grps[which(rppa_all$AKT_pT308_hi_lo_p38_grps=="high")] <- paste(rppa_all$AKT_pT308_hi_lo_p38_grps[which(rppa_all$AKT_pT308_hi_lo_p38_grps=="high")],
