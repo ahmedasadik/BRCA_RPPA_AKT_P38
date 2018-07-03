@@ -1,3 +1,11 @@
+## This script can be used to generate boxplots with group comparisons of patients based on AKT_pT308 and P38_pT180Y182 RPPA levels.
+## The patients are first divided based on the expression of the levels of the AKT_pT308, then under each AKT_pT308 group,
+## patients are further divided based on P38_pT180Y182. Grouping is decided based on median separation, with the possibility
+## of deviating from the median by increments of the median absolute deviation. Using both TCGA RNA-seq and TCPA RPPA data
+## of breast cancer (BRCA), it is preferrable to generate a dataframe with patients that have both expression and protein data
+## available (as applied in the script). The final output of this script is a plot showing the difference in RPPA values of selected 
+## mTOR readouts in the patient groups previously decided.
+
 library(purrr)
 library(ggplot2)
 library(gridExtra)
